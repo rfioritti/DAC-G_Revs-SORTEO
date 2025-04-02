@@ -47,11 +47,16 @@
       background-color: #007a36;
     }
 
-    .resultado {
+    .resultado, .cuenta {
       margin-top: 2rem;
       font-size: 2rem;
       font-weight: bold;
       color: #d71920;
+    }
+
+    .cuenta {
+      font-size: 3rem;
+      color: #009540;
     }
 
     canvas {
@@ -72,12 +77,13 @@
 
   <h1>🎉 Sorteo de funcionario ganador del concurso Google Reviews 🎉</h1>
   <p>Hacé clic para conocer al ganador</p>
-  <button onclick="sortear()">Sortear</button>
+  <button id="botonSortear" onclick="iniciarCuentaRegresiva()">Sortear</button>
+
+  <div class="cuenta" id="cuenta"></div>
   <div class="resultado" id="resultado"></div>
 
   <canvas id="confetti-canvas"></canvas>
 
-  <!-- PapaParse para leer CSV correctamente -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <script>
@@ -95,20 +101,42 @@
             nombre: p["NOMBRE"].trim(),
             agencia: p["AGENCIA"].trim()
           }));
-        console.log("Participantes cargados:", participantes);
       },
       error: function(err) {
         document.getElementById("resultado").textContent = "⚠️ Error al cargar los datos.";
-        console.error("PapaParse error:", err);
       }
     });
 
-    function sortear() {
+    function iniciarCuentaRegresiva() {
       if (participantes.length === 0) {
         alert("Todavía no se cargaron los datos.");
         return;
       }
 
+      const cuenta = document.getElementById("cuenta");
+      const resultado = document.getElementById("resultado");
+      const boton = document.getElementById("botonSortear");
+
+      resultado.textContent = '';
+      cuenta.textContent = '3';
+      boton.disabled = true;
+
+      let contador = 3;
+
+      const intervalo = setInterval(() => {
+        contador--;
+        if (contador > 0) {
+          cuenta.textContent = contador;
+        } else {
+          clearInterval(intervalo);
+          cuenta.textContent = '';
+          sortear();
+          boton.disabled = false;
+        }
+      }, 1000);
+    }
+
+    function sortear() {
       const ganador = participantes[Math.floor(Math.random() * participantes.length)];
       document.getElementById("resultado").textContent = `🎊 ¡Ganador: ${ganador.nombre} (${ganador.agencia}) 🎊`;
 
